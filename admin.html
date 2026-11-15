@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>G.O.A.T ADMIN DASHBOARD — Owner Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Admin-only overrides ── */
+    :root {
+      --goat-accent: #ff9900; /* orange accent for admin — distinguishes it from public */
+      --goat-border-glow: rgba(255, 153, 0, 0.3);
+    }
+
+    .admin-topbar {
+      background: rgba(230, 51, 41, 0.08);
+      border-bottom: 2px solid var(--goat-red);
+      padding: 0.6rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .admin-topbar__label {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--goat-red);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .admin-topbar__warning {
+      font-size: 0.72rem;
+      color: var(--goat-text-muted);
+      letter-spacing: 0.05em;
+    }
+    .admin-topbar__link {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--goat-text-muted);
+    }
+    .admin-topbar__link:hover { color: var(--goat-accent); }
+
+    /* Admin hero */
+    .admin-hero__title .accent { color: var(--goat-red); }
+    .goat-hero__badge { background: rgba(230,51,41,0.12); border-color: rgba(230,51,41,0.5); color: var(--goat-red); }
+
+    /* Station toggle buttons (admin) */
+    .admin-station-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .admin-station-grid--ps5 { grid-template-columns: repeat(3, 1fr); }
+    .admin-station-grid--pc  { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; }
+
+    .admin-station-btn {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 1.1rem 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1.5px solid;
+      background: var(--goat-bg);
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: transform 150ms ease, box-shadow 150ms ease;
+      min-height: 95px;
+      text-align: center;
+      overflow: hidden;
+      user-select: none;
+    }
+    .admin-station-grid--pc .admin-station-btn { min-height: 78px; font-size: 0.72rem; padding: 0.8rem 0.3rem; }
+
+    .admin-station-btn.available {
+      border-color: var(--goat-accent);
+      color: var(--goat-accent);
+      box-shadow: 0 0 10px rgba(255,153,0,0.1);
+    }
+    .admin-station-btn.booked {
+      border-color: var(--goat-red);
+      color: var(--goat-red);
+      background: rgba(230,51,41,0.08);
+    }
+    .admin-station-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    }
+    .admin-station-btn:active { transform: scale(0.97); }
+
+    .admin-station-btn__icon  { font-size: 1.3rem; line-height: 1; }
+    .admin-station-grid--pc .admin-station-btn__icon { font-size: 1rem; }
+    .admin-station-btn__time  { font-size: 0.6rem; font-weight: 500; color: var(--goat-text-muted); letter-spacing: 0.05em; }
+
+    /* Booked overlay ribbon */
+    .admin-station-btn.booked::after {
+      content: 'BOOKED';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      font-size: 0.45rem;
+      letter-spacing: 0.15em;
+      text-align: center;
+      padding: 0.2rem 0;
+      background: var(--goat-red);
+      color: white;
+      font-weight: 800;
+    }
+
+    /* "Time until" inline input (shown when marking booked) */
+    .time-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+    .time-modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .time-modal {
+      background: var(--goat-surface);
+      border: 1px solid var(--goat-border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 360px;
+      width: calc(100% - 2rem);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .time-modal h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--goat-text);
+    }
+    .time-modal p { font-size: 0.82rem; color: var(--goat-text-muted); }
+    .time-modal__actions { display: flex; gap: 0.75rem; }
+    .time-modal__btn {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: var(--radius-md);
+      border: none;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 150ms ease, transform 150ms ease;
+    }
+    .time-modal__btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .time-modal__btn--confirm { background: var(--goat-red); color: white; }
+    .time-modal__btn--cancel  { background: var(--goat-surface-2); color: var(--goat-text-muted); }
+
+    /* Leaderboard Editor */
+    .lb-editor-row {
+      display: grid;
+      grid-template-columns: 2rem 1fr 100px auto;
+      gap: 0.6rem;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--goat-border);
+    }
+    .lb-editor-row:last-child { border-bottom: none; }
+    .lb-editor-row__rank {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--goat-text-muted);
+      text-align: center;
+    }
+    .lb-editor__input {
+      background: var(--goat-bg);
+      border: 1px solid var(--goat-border);
+      border-radius: var(--radius-sm);
+      color: var(--goat-text);
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      outline: none;
+      transition: border-color 150ms;
+      width: 100%;
+    }
+    .lb-editor__input:focus { border-color: var(--goat-accent); }
+    .lb-editor__pct-wrap { position: relative; }
+    .lb-editor__pct-wrap input { padding-right: 1.5rem; text-align: right; }
+    .lb-editor__pct-symbol {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--goat-text-muted);
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+    .lb-editor__save-btn {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--goat-accent);
+      background: transparent;
+      color: var(--goat-accent);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 150ms, color 150ms;
+      white-space: nowrap;
+    }
+    .lb-editor__save-btn:hover { background: var(--goat-accent); color: var(--goat-bg); }
+    .lb-editor__save-btn.saved { background: var(--goat-accent); color: var(--goat-bg); }
+
+    /* WhatsApp quick-reply guide */
+    .wa-guide {
+      background: rgba(37, 211, 102, 0.06);
+      border: 1px solid rgba(37, 211, 102, 0.25);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .wa-guide__header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .wa-guide__icon { font-size: 1.5rem; }
+    .wa-guide__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #25D366;
+    }
+    .wa-guide__steps { display: flex; flex-direction: column; gap: 0.5rem; }
+    .wa-guide__step {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: 0.82rem;
+      color: var(--goat-text-muted);
+      line-height: 1.5;
+    }
+    .wa-guide__step-num {
+      flex-shrink: 0;
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 50%;
+      background: rgba(37, 211, 102, 0.15);
+      border: 1px solid rgba(37, 211, 102, 0.3);
+      color: #25D366;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.1rem;
+    }
+    .wa-guide__step strong { color: var(--goat-text); }
+    .wa-guide__code {
+      background: var(--goat-bg);
+      border: 1px solid var(--goat-border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: #25D366;
+      letter-spacing: 0.04em;
+      word-break: break-all;
+    }
+    .wa-guide__note {
+      font-size: 0.75rem;
+      color: var(--goat-text-dim);
+      font-style: italic;
+    }
+
+    /* Stats summary bar */
+    .admin-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .admin-stat-card {
+      background: var(--goat-bg);
+      border: 1px solid var(--goat-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .admin-stat-card__label {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--goat-text-muted);
+    }
+    .admin-stat-card__value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+    .admin-stat-card__value.avail { color: var(--goat-accent); }
+    .admin-stat-card__value.booked-v { color: var(--goat-red); }
+    .admin-stat-card__sub { font-size: 0.7rem; color: var(--goat-text-dim); }
+
+    /* Toast notification */
+    .admin-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--goat-surface);
+      border: 1px solid var(--goat-accent);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.4rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--goat-accent);
+      letter-spacing: 0.06em;
+      z-index: 3000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 300ms ease, opacity 300ms ease;
+      pointer-events: none;
+    }
+    .admin-toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Section divider */
+    .admin-divider {
+      border: none;
+      height: 1px;
+      background: var(--goat-border);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 600px) {
+      .admin-station-grid--ps5 { grid-template-columns: repeat(3, 1fr); }
+      .lb-editor-row { grid-template-columns: 2rem 1fr; row-gap: 0.4rem; }
+      .lb-editor-row__pct,
+      .lb-editor-row__action { grid-column: 2 / -1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Admin warning topbar ── -->
+  <div class="admin-topbar">
+    <span class="admin-topbar__label">🔐 OWNER CONTROL PANEL — RESTRICTED ACCESS</span>
+    <span class="admin-topbar__warning">Changes here update the live booking page in real time (once Firebase is wired).</span>
+    <a href="index.html" class="admin-topbar__link">← View Public Hub</a>
+  </div>
+
+  <!-- ── Admin Header ── -->
+  <header class="goat-header">
+    <div class="goat-header__inner">
+      <div class="goat-logo">
+        <span class="goat-logo__icon">🎮</span>
+        <div class="goat-logo__text">
+          <span class="goat-logo__brand">THE G.O.A.T</span>
+          <span class="goat-logo__sub">ADMIN PANEL</span>
+        </div>
+      </div>
+      <nav class="goat-nav">
+        <a href="index.html" class="goat-nav__link">Public Hub</a>
+        <a href="https://wa.me/918884655514" target="_blank" rel="noopener" class="goat-nav__cta">💬 WhatsApp</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Admin Dashboard ── -->
+  <main class="goat-dashboard-container" id="adminContainer">
+
+    <!-- HERO -->
+    <section class="goat-hero admin-hero">
+      <div class="goat-hero__badge">🔐 ADMIN MODE</div>
+      <h1 class="goat-hero__title admin-hero__title">
+        G.O.A.T <span class="accent" style="color: var(--goat-red);">ADMIN</span>
+      </h1>
+      <p class="goat-hero__subtitle">OWNER CONTROL PANEL · LIVE STATION MANAGEMENT</p>
+      <div class="goat-hero__scan-line"></div>
+    </section>
+
+    <!-- BRANCH TOGGLE -->
+    <section class="goat-section goat-branch-section">
+      <div class="branch-toggle-wrapper">
+        <span class="branch-toggle__label">MANAGING BRANCH</span>
+        <div class="branch-toggle" role="group" aria-label="Admin branch selector">
+          <button class="branch-btn active" data-branch="belroad" aria-pressed="true">
+            <span class="branch-btn__icon">📍</span>NEW BEL ROAD
+          </button>
+          <button class="branch-btn" data-branch="jayanagar" aria-pressed="false">
+            <span class="branch-btn__icon">📍</span>JAYANAGAR
+          </button>
+        </div>
+        <div class="branch-toggle__indicator">
+          <span id="adminBranchLabel">● MANAGING: NEW BEL ROAD</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS SUMMARY BAR -->
+    <section class="goat-section">
+      <div class="admin-stats-bar" id="adminStatsBar">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         AVAILABILITY MANAGER
+    ══════════════════════════════════════ -->
+    <section class="goat-section">
+      <div class="section-header" style="text-align:left; margin-bottom:1.5rem;">
+        <div class="section-header__tag">🕹️ AVAILABILITY MANAGER</div>
+        <h2 class="section-header__title">TOGGLE STATION STATUS</h2>
+        <p class="section-header__sub">Click any station to toggle between Available ↔ Booked. Changes reflect instantly on the public hub.</p>
+      </div>
+
+      <!-- PS5 Manager -->
+      <div class="availability-block" style="margin-bottom: 1.5rem;">
+        <div class="availability-block__header">
+          <h3 class="availability-block__title">
+            <span>🎮</span> VIP PS5 LOUNGE
+            <span class="availability-block__tag gta-tag">3 STATIONS</span>
+          </h3>
+          <div class="availability-block__count" id="adminPs5Count">— Available</div>
+        </div>
+        <div class="admin-station-grid admin-station-grid--ps5" id="adminPs5Grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- PC Manager -->
+      <div class="availability-block">
+        <div class="availability-block__header">
+          <h3 class="availability-block__title">
+            <span>💻</span> ESPORTS PC ARENA
+            <span class="availability-block__tag pc-tag">20 STATIONS</span>
+          </h3>
+          <div class="availability-block__count" id="adminPcCount">— Available</div>
+        </div>
+        <div class="admin-station-grid admin-station-grid--pc" id="adminPcGrid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <hr class="admin-divider" />
+
+    <!-- ══════════════════════════════════════
+         LEADERBOARD MANAGER
+    ══════════════════════════════════════ -->
+    <section class="goat-section">
+      <div class="section-header" style="text-align:left; margin-bottom:1.5rem;">
+        <div class="section-header__tag">🏆 LEADERBOARD MANAGER</div>
+        <h2 class="section-header__title">EDIT PLAYER RANKINGS</h2>
+        <p class="section-header__sub">Update GTA 6 story completion % for the active branch. Click SAVE on each row to apply.</p>
+      </div>
+
+      <div class="availability-block">
+        <div class="availability-block__header">
+          <h3 class="availability-block__title">📍 Local Branch Top 3</h3>
+          <span style="font-size:0.75rem; color:var(--goat-text-muted);" id="adminLbBranchLabel">NEW BEL ROAD</span>
+        </div>
+        <div id="adminLbEditor">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="availability-block" style="margin-top:1.5rem;">
+        <div class="availability-block__header">
+          <h3 class="availability-block__title">🌍 Global Record Holders</h3>
+          <span style="font-size:0.75rem; color:var(--goat-text-muted);">All-time, Both Branches</span>
+        </div>
+        <div id="adminGlobalLbEditor">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <hr class="admin-divider" />
+
+    <!-- ══════════════════════════════════════
+         WHATSAPP QUICK REPLY GUIDE
+    ══════════════════════════════════════ -->
+    <section class="goat-section">
+      <div class="section-header" style="text-align:left; margin-bottom:1.5rem;">
+        <div class="section-header__tag">💬 OPERATIONS GUIDE</div>
+        <h2 class="section-header__title">WHATSAPP QUICK REPLY WORKFLOW</h2>
+      </div>
+
+      <div class="wa-guide">
+        <div class="wa-guide__header">
+          <span class="wa-guide__icon">📱</span>
+          <span class="wa-guide__title">When a Player Requests a Slot via WhatsApp</span>
+        </div>
+        <div class="wa-guide__steps">
+
+          <div class="wa-guide__step">
+            <span class="wa-guide__step-num">1</span>
+            <span>
+              <strong>Receive the booking request.</strong> The player will send a pre-filled message via the public hub. It includes their Gamer Tag, Branch, Station Type, and Duration.
+            </span>
+          </div>
+
+          <div class="wa-guide__step">
+            <span class="wa-guide__step-num">2</span>
+            <span>
+              <strong>Check availability above.</strong> Confirm the requested station type has an open slot on this admin panel before proceeding.
+            </span>
+          </div>
+
+          <div class="wa-guide__step">
+            <span class="wa-guide__step-num">3</span>
+            <span>
+              <strong>Send the UPI payment link.</strong> Use your WhatsApp <code>/qr</code> quick-reply shortcut to instantly share your UPI QR code or payment link. Wait for payment confirmation.
+            </span>
+          </div>
+
+          <div class="wa-guide__step">
+            <span class="wa-guide__step-num">4</span>
+            <span>
+              <strong>Confirm payment received.</strong> Once paid, reply to the player:
+            </span>
+          </div>
+          <div class="wa-guide__code">
+            ✅ *Slot Confirmed!* Welcome to G.O.A.T 🎮
+Your [STATION] is ready. Walk in and head to [Station ID].
+See you in the Lobby! GGz 🔥
+          </div>
+
+          <div class="wa-guide__step">
+            <span class="wa-guide__step-num">5</span>
+            <span>
+              <strong>Mark the station as BOOKED here.</strong> Click the station button above to toggle it to Booked. Enter the "Until" time (session end time) so the public hub shows it correctly.
+            </span>
+          </div>
+
+          <div class="wa-guide__step">
+            <span class="wa-guide__step-num">6</span>
+            <span>
+              <strong>When session ends,</strong> click the station again to toggle it back to Available. The public hub updates instantly.
+            </span>
+          </div>
+
+        </div>
+        <p class="wa-guide__note">
+          💡 Tip: Save the message template above as a WhatsApp Quick Reply (Business App → Tools → Quick Replies → /confirmed) so you can send it in one tap.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Time Modal -->
+  <div class="time-modal-overlay" id="timeModalOverlay" role="dialog" aria-modal="true" aria-labelledby="timeModalTitle">
+    <div class="time-modal">
+      <h4 id="timeModalTitle">📌 Mark Station as Booked</h4>
+      <p>Enter the time this station will be free (e.g. 02:30 AM):</p>
+      <input class="form-input" type="text" id="timeModalInput" placeholder="e.g. 02:30 AM" maxlength="10" />
+      <div class="time-modal__actions">
+        <button class="time-modal__btn time-modal__btn--cancel" id="timeModalCancel">Cancel</button>
+        <button class="time-modal__btn time-modal__btn--confirm" id="timeModalConfirm">Mark Booked ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="admin-toast" id="adminToast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>G.O.A.T LIVE: GTA 6 HUB — Live Booking & Availability</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="goat-header">
+    <div class="goat-header__inner">
+      <a href="https://goatgamingcafe.in" class="goat-logo" aria-label="G.O.A.T Gaming Cafe Home">
+        <span class="goat-logo__icon">🎮</span>
+        <div class="goat-logo__text">
+          <span class="goat-logo__brand">THE G.O.A.T</span>
+          <span class="goat-logo__sub">GAMING CAFE</span>
+        </div>
+      </a>
+      <nav class="goat-nav">
+        <a href="https://goatgamingcafe.in" class="goat-nav__link">← Back to Main Site</a>
+        <a href="https://wa.me/918884655514" target="_blank" rel="noopener noreferrer" class="goat-nav__cta">
+          💬 Contact &amp; Support
+        </a>
+      </nav>
+      <button class="goat-nav__burger" id="navBurger" aria-label="Open Menu">&#9776;</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN DASHBOARD ═══════════════ -->
+  <main class="goat-dashboard-container" id="publicContainer">
+
+    <!-- ── HERO ── -->
+    <section class="goat-hero">
+      <div class="goat-hero__badge" id="liveBadge">⚡ LIVE NOW</div>
+      <h1 class="goat-hero__title">
+        G.O.A.T <span class="accent">LIVE</span>
+      </h1>
+      <p class="goat-hero__subtitle">GTA 6 HUB · LIVE BOOKING &amp; REAL-TIME AVAILABILITY</p>
+      <div class="goat-hero__scan-line"></div>
+    </section>
+
+    <!-- ── BRANCH TOGGLE ── -->
+    <section class="goat-section goat-branch-section">
+      <div class="branch-toggle-wrapper">
+        <span class="branch-toggle__label">SELECT YOUR BRANCH</span>
+        <div class="branch-toggle" role="group" aria-label="Branch selector">
+          <button class="branch-btn active" data-branch="belroad" aria-pressed="true">
+            <span class="branch-btn__icon">📍</span>NEW BEL ROAD
+          </button>
+          <button class="branch-btn" data-branch="jayanagar" aria-pressed="false">
+            <span class="branch-btn__icon">📍</span>JAYANAGAR
+          </button>
+        </div>
+        <div class="branch-toggle__indicator">
+          <span id="branchLiveLabel">● LIVE: NEW BEL ROAD</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         LEADERBOARD ZONE
+    ══════════════════════════════════════ -->
+    <section class="goat-section goat-leaderboard-zone">
+      <div class="section-header">
+        <div class="section-header__tag">🏆 GTA 6 STORY RANKINGS</div>
+        <h2 class="section-header__title">HALL OF LEGENDS</h2>
+      </div>
+
+      <div class="leaderboard-triptych">
+
+        <!-- A: GLOBAL RECORD HOLDERS -->
+        <div class="lb-panel lb-panel--global">
+          <div class="lb-panel__header">
+            <span class="lb-panel__icon">🌍</span>
+            <div>
+              <h3 class="lb-panel__title">GLOBAL RECORD HOLDERS</h3>
+              <p class="lb-panel__sub">Fastest to 100% — All-Time, Both Branches</p>
+            </div>
+          </div>
+          <div class="lb-panel__body" id="globalRecordsList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- B: INTER-BRANCH RIVALRY -->
+        <div class="lb-panel lb-panel--rivalry">
+          <div class="lb-panel__header">
+            <span class="lb-panel__icon">⚔️</span>
+            <div>
+              <h3 class="lb-panel__title">INTER-BRANCH RIVALRY</h3>
+              <p class="lb-panel__sub">Average Story % — BEL Road vs Jayanagar</p>
+            </div>
+          </div>
+          <div class="lb-panel__body" id="rivalryBars">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- C: LOCAL BRANCH TOP 3 -->
+        <div class="lb-panel lb-panel--local">
+          <div class="lb-panel__header">
+            <span class="lb-panel__icon">📍</span>
+            <div>
+              <h3 class="lb-panel__title">LOCAL TOP 3</h3>
+              <p class="lb-panel__sub" id="localLbSub">NEW BEL ROAD Branch Leaders</p>
+            </div>
+          </div>
+          <div class="lb-panel__body" id="localLeaderboard">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div><!-- /.leaderboard-triptych -->
+    </section>
+
+    <!-- ── AVAILABILITY GRID ── -->
+    <section class="goat-section goat-availability-section">
+      <div class="section-header">
+        <div class="section-header__tag">🕹️ REAL-TIME STATUS</div>
+        <h2 class="section-header__title">STATION AVAILABILITY</h2>
+      </div>
+
+      <!-- Section A: PS5 (3 blocks) -->
+      <div class="availability-block">
+        <div class="availability-block__header">
+          <h3 class="availability-block__title">
+            <span>🎮</span>
+            VIP PS5 LOUNGE
+            <span class="availability-block__tag gta-tag">GTA 6 READY</span>
+          </h3>
+          <div class="availability-block__count" id="ps5AvailCount">— Available</div>
+        </div>
+        <div class="station-grid station-grid--ps5" id="ps5Grid"></div>
+      </div>
+
+      <!-- Section B: PC (20 blocks) -->
+      <div class="availability-block">
+        <div class="availability-block__header">
+          <h3 class="availability-block__title">
+            <span>💻</span>
+            ESPORTS PC ARENA
+            <span class="availability-block__tag pc-tag">Valorant · CS2 · Warzone</span>
+          </h3>
+          <div class="availability-block__count" id="pcAvailCount">— Available</div>
+        </div>
+        <div class="station-grid station-grid--pc" id="pcGrid"></div>
+      </div>
+    </section>
+
+    <!-- ── VIP BOOKING FORM ── -->
+    <section class="goat-section goat-booking-section">
+      <div class="section-header">
+        <div class="section-header__tag">📲 SECURE YOUR SLOT</div>
+        <h2 class="section-header__title">VIP BOOKING PORTAL</h2>
+        <p class="section-header__sub">Fill in your details — we'll confirm via WhatsApp instantly.</p>
+      </div>
+
+      <form class="booking-form" id="bookingForm" novalidate>
+        <div class="form-grid">
+
+          <div class="form-group form-group--full">
+            <label class="form-label" for="gamerTag">
+              <span class="form-label__icon">👾</span> GAMER TAG
+            </label>
+            <input class="form-input" type="text" id="gamerTag" name="gamerTag"
+              placeholder="Enter your Gamer Tag" autocomplete="off" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="stationType">
+              <span class="form-label__icon">🕹️</span> STATION TYPE
+            </label>
+            <div class="select-wrapper">
+              <select class="form-select" id="stationType" name="stationType" required>
+                <option value="" disabled selected>Choose Station</option>
+                <option value="PS5 VIP Lounge">PS5 VIP Lounge (GTA 6 Ready)</option>
+                <option value="PC Esports Arena">PC Esports Arena</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="duration">
+              <span class="form-label__icon">⏱️</span> SESSION DURATION
+            </label>
+            <div class="select-wrapper">
+              <select class="form-select" id="duration" name="duration" required>
+                <option value="" disabled selected>Select Duration</option>
+                <option value="2 Hours">2 Hours</option>
+                <option value="4 Hours">4 Hours</option>
+                <option value="6 Hour Marathon">6 Hour Marathon 🔥</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="form-group form-group--full">
+            <button class="form-submit" type="submit">
+              <span class="form-submit__icon">💬</span>
+              SECURE SLOT VIA WHATSAPP
+              <span class="form-submit__arrow">→</span>
+            </button>
+          </div>
+
+        </div>
+        <div class="form-error" id="formError" role="alert" aria-live="polite"></div>
+      </form>
+
+      <p class="booking-note">
+        ⚡ Slots confirmed within <strong>5 minutes</strong> during peak hours.
+        Branch: <strong id="bookingBranchLabel">NEW BEL ROAD</strong>
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="goat-footer">
+    <div class="goat-footer__inner">
+      <div class="goat-footer__logo">
+        <span class="goat-logo__icon large">🎮</span>
+        <div class="goat-logo__text">
+          <span class="goat-logo__brand">THE G.O.A.T</span>
+          <span class="goat-logo__sub">GAMING CAFE</span>
+        </div>
+      </div>
+      <div class="goat-footer__cols">
+        <div class="goat-footer__col">
+          <h4>Quick Links</h4>
+          <a href="https://goatgamingcafe.in">Home</a>
+          <a href="https://goatgamingcafe.in/#about">Why Us</a>
+          <a href="https://goatgamingcafe.in/#services">Services</a>
+        </div>
+        <div class="goat-footer__col">
+          <h4>Discover</h4>
+          <a href="https://goatgamingcafe.in/#gallery">Gallery</a>
+          <a href="https://goatgamingcafe.in/#branches">Branches</a>
+          <a href="https://goatgamingcafe.in/#franchise">Franchise</a>
+        </div>
+        <div class="goat-footer__col">
+          <h4>Connect With Us</h4>
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+          <a href="#">YouTube</a>
+          <a href="https://wa.me/918884655514" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+        <div class="goat-footer__col goat-footer__contact">
+          <h4>Talk To Us</h4>
+          <p>We're Always In Your Lobby!</p>
+          <a href="tel:+918884655514" class="goat-footer__phone">+91 8884655514</a>
+          <div class="goat-footer__locations">
+            <a href="#">📍 Jayanagar ↗</a>
+            <a href="#">📍 New BEL Rd ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="goat-footer__bottom">
+      <span>© 2026 G.O.A.T Gaming Cafe. All rights reserved.</span>
+      <span class="goat-footer__tagline">Power up responsibly. Stay hydrated. GGz.</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
